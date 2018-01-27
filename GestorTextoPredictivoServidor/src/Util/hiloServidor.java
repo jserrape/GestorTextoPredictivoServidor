@@ -125,6 +125,7 @@ public class hiloServidor extends Thread {
         if (f.exists()) {
             return true;
         } else {
+            System.out.println("Directorio mac creado");
             File directorio = new File("./dataSets/" + mac);
             directorio.mkdir();
             return false;
