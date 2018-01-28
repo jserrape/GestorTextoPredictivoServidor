@@ -23,7 +23,7 @@ public class hiloServidor extends Thread {
     private Predictor predictor;
 
     public hiloServidor(Socket socket) {
-        super("KKMultiServerThread");
+        super("HiloServidor");
         this.dataSetCargado = "";
         this.socket = socket;
         this.configuracion = new ConfiguracionDataSet();
@@ -210,8 +210,6 @@ public class hiloServidor extends Thread {
 
     public void cargarTexto(String mensaje) throws IOException {
         predictor.insertarTexto(mensaje);
-        out.println("OK"); //¿?
-        //predictor.mostrarContenido();
     }
 
     public void realizarPrediccion(char completa, String mensaje) {
