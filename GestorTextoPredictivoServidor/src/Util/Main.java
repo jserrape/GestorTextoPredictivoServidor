@@ -12,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         boolean listening = true;
-comprobarDirectorioDataSet();
+        comprobarDirectorioDataSet();
         ServerSocket serverSocket = new ServerSocket(4444);
 
         Socket socket;
@@ -27,12 +27,12 @@ comprobarDirectorioDataSet();
 
     private static void comprobarDirectorioDataSet() {
         File directorio = new File("./dataSets");
-        if(!directorio.exists()){
+        if (!directorio.exists()) {
             System.out.println("El directorio de dataSets no existia");
             directorio.mkdir();
-        }else{
+        } else {
             System.out.println("El directorio de dataSets SI existia");
         }
-        
+
     }
 }

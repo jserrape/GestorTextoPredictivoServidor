@@ -17,6 +17,9 @@ public class hiloServidor extends Thread {
     private Socket socket = null;
     private String mac;
     private PrintWriter out;
+    private BufferedReader in;
+
+    private boolean desconectarse;
 
     private String dataSetCargado;
     private ConfiguracionDataSet configuracion;
@@ -33,12 +36,14 @@ public class hiloServidor extends Thread {
             Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
         }
         predictor = new Predictor(this.configuracion);
+
+        desconectarse = false;
     }
 
     @Override
     public void run() {
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             //Verifico que se ha establecido conexion
             out.println("Conexion correcta con el servidor");
@@ -55,13 +60,15 @@ public class hiloServidor extends Thread {
                 if (mensaje.length() == 1) {
                     elegirAccion(mensaje.charAt(0), "");
                 } else {
-                    elegirAccion(mensaje.charAt(0), mensaje.substring(1, mensaje.length()));
+                    if(mensaje.length() != 0){
+                        elegirAccion(mensaje.charAt(0), mensaje.substring(1, mensaje.length()));
+                    }
                 }
             }
             out.close();
             in.close();
             socket.close();
-
+            System.out.println("Cierro la conexion del cliente " + mac);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,6 +105,13 @@ public class hiloServidor extends Thread {
             case '7':
                 System.out.println("Cliente solicitando una prediccion");
                 realizarPrediccion(mensaje.charAt(0), mensaje.substring(1, mensaje.length()));
+                break;
+            case '8':
+                System.out.println("Cliente solicitando interrumpir la conexion");
+                out.close();
+                in.close();
+                socket.close();
+                this.interrupt();
                 break;
         }
     }
