@@ -19,11 +19,11 @@ public class hiloServidor extends Thread {
     private PrintWriter out;
     private BufferedReader in;
 
-    private boolean desconectarse;
-
     private String dataSetCargado;
     private ConfiguracionDataSet configuracion;
     private Predictor predictor;
+
+    private HiloSeriabilizacion hiloSeriabilizar;
 
     public hiloServidor(Socket socket) {
         super("HiloServidor");
@@ -36,8 +36,7 @@ public class hiloServidor extends Thread {
             Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
         }
         predictor = new Predictor(this.configuracion);
-
-        desconectarse = false;
+        hiloSeriabilizar = new HiloSeriabilizacion();
     }
 
     @Override
@@ -60,7 +59,7 @@ public class hiloServidor extends Thread {
                 if (mensaje.length() == 1) {
                     elegirAccion(mensaje.charAt(0), "");
                 } else {
-                    if(mensaje.length() != 0){
+                    if (mensaje.length() != 0) {
                         elegirAccion(mensaje.charAt(0), mensaje.substring(1, mensaje.length()));
                     }
                 }
@@ -99,7 +98,7 @@ public class hiloServidor extends Thread {
                 cargarDataSet(mensaje);
                 break;
             case '6':
-                System.out.println("Cliente solicitando cargar un documento");
+                System.out.println("Cliente solicitando cargar un documento"); //ESTUDIAR LA SITUACION SI ESTOY SERIABILIZANDO
                 cargarTexto(mensaje);
                 break;
             case '7':
@@ -192,41 +191,36 @@ public class hiloServidor extends Thread {
         }
     }
 
-    public void cargarDataSet(String mensaje) {
+    private void cargarDataSet(String mensaje) {
         System.out.println(mensaje);
         this.dataSetCargado = mensaje;
-
-        String sFichero = "./dataSets/" + mac + "/" + mensaje;
-        File fichero = new File(sFichero);
         out.println(dataSetCargado);
-        if (fichero.length() == 0) {
-            System.out.println("Ocupa ==0");
-            this.configuracion.cambiarConfiguracionDataSet(mac, mensaje);
-            this.predictor = new Predictor(this.configuracion);
-        } else {
-            System.out.println("Ocupa !=0");
-            FileInputStream fis;
-            try {
-                System.out.println("./dataSets/" + mac + "/" + mensaje);
-                fis = new FileInputStream("./dataSets/" + mac + "/" + mensaje);
-                try (ObjectInputStream ois = new ObjectInputStream(fis)) {
-                    predictor.actualizar((Predictor) ois.readObject());
-                }
-                fis.close();
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException | ClassNotFoundException ex) {
-                Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            this.configuracion = predictor.getConfiguracion();
+
+        if(hiloSeriabilizar.isAlive()){
+            System.out.println("Estaba activo, lo interrumpo");
+            hiloSeriabilizar.interrumpirHilo();
         }
+        this.hiloSeriabilizar=new HiloSeriabilizacion(mac,mensaje,configuracion,predictor,this);
+        hiloSeriabilizar.start();
     }
 
-    public void cargarTexto(String mensaje) throws IOException {
+    public void cambiarConfiguracion(ConfiguracionDataSet configuracion) {
+        this.configuracion = configuracion;
+    }
+
+    public void cambiarPredictor(Predictor predictor) {
+        this.predictor = predictor;
+    }
+
+    private void cargarTexto(String mensaje) throws IOException {
         predictor.insertarTexto(mensaje);
     }
 
-    public void realizarPrediccion(char completa, String mensaje) {
+    private void realizarPrediccion(char completa, String mensaje) {
+        if(hiloSeriabilizar.isAlive()){
+            out.println("");
+            return;
+        }
         System.out.println("Completa:" + completa);
         System.out.println("Mensaje:" + mensaje);
         String pred = this.predictor.realizarPrediccion(completa, mensaje);
