@@ -20,7 +20,7 @@ public class Main {
         while (listening) {
             socket = serverSocket.accept();
             System.out.println("Nueva conexion de " + socket);
-            new HiloServidor(socket).start();
+            new hiloServidor(socket).start();
         }
         serverSocket.close();
     }

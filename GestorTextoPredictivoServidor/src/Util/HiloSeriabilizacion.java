@@ -23,14 +23,14 @@ public class HiloSeriabilizacion extends Thread {
     private String mensaje;
     private ConfiguracionDataSet configuracion;
     private Predictor predictor;
-    private HiloServidor hiloServer;
+    private hiloServidor hiloServer;
 
     private FileInputStream fis;
 
     public HiloSeriabilizacion() {
     }
 
-    public HiloSeriabilizacion(String mac, String mensaje, ConfiguracionDataSet configuracion, Predictor predictor, HiloServidor hiloServer) {
+    public HiloSeriabilizacion(String mac, String mensaje, ConfiguracionDataSet configuracion, Predictor predictor, hiloServidor hiloServer) {
         this.mac = mac;
         this.mensaje = mensaje;
         this.configuracion = configuracion;
@@ -60,9 +60,9 @@ public class HiloSeriabilizacion extends Thread {
                 }
                 fis.close();
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException | ClassNotFoundException ex) {
-                Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
             }
             this.configuracion = predictor.getConfiguracion();
             this.hiloServer.cambiarConfiguracion(configuracion);
