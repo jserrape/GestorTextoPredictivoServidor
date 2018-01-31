@@ -129,11 +129,12 @@ public class Predictor implements Serializable {
 
                 if (almacenesSemilla[i].containsKey(semilla)) {
                     for (int z = 0; z < almacenesSemilla[i].get(semilla).size(); z++) {
-                        arr.add(almacenesSemilla[i].get(semilla).get(z).getPrediccion());
-                        //System.out.println(almacenesSemillas[i].get(semilla).get(z).getN() + " " + almacenesSemillas[i].get(semilla).get(z).getPrediccion());
-                        if (arr.size() == this.getConfiguracion().getMaxPredicciones()) {
-                            System.out.println(arr.toString());
-                            return arr.toString();
+                        if (!arr.contains(almacenesSemilla[i].get(semilla).get(z).getPrediccion())) {
+                            arr.add(almacenesSemilla[i].get(semilla).get(z).getPrediccion());
+                            if (arr.size() == this.getConfiguracion().getMaxPredicciones()) {
+                                System.out.println(arr.toString());
+                                return arr.toString();
+                            }
                         }
                     }
                 }
@@ -166,10 +167,11 @@ public class Predictor implements Serializable {
                     if (almacenesSemilla[i].containsKey(semillaBase)) {
                         for (int j = 0; j < almacenesSemilla[i].get(semillaBase).size(); j++) {
                             if (almacenesSemilla[i].get(semillaBase).get(j).getPrediccion().indexOf(semillaInacabada) == 0) {
-                                arr.add(almacenesSemilla[i].get(semillaBase).get(j).getPrediccion());
-                                //System.out.println(almacenesSemillas[i].get(semillaBase).get(j).getN() + " " + almacenesSemillas[i].get(semillaBase).get(j).getPrediccion());
-                                if (arr.size() == this.getConfiguracion().getMaxPredicciones()) {
-                                    return arr.toString();
+                                if (!arr.contains(almacenesSemilla[i].get(semillaBase).get(j).getPrediccion())) {
+                                    arr.add(almacenesSemilla[i].get(semillaBase).get(j).getPrediccion());
+                                    if (arr.size() == this.getConfiguracion().getMaxPredicciones()) {
+                                        return arr.toString();
+                                    }
                                 }
                             }
                         }
@@ -180,8 +182,7 @@ public class Predictor implements Serializable {
         }
     }
 
-    
-    public void seriabilizar() throws IOException{
+    public void seriabilizar() throws IOException {
         ByteArrayOutputStream bs = new ByteArrayOutputStream();
         ObjectOutputStream os = new ObjectOutputStream(bs);
         os.writeObject(this);
@@ -190,7 +191,6 @@ public class Predictor implements Serializable {
         Path path = Paths.get("./dataSets/" + this.getConfiguracion().getMac() + "/" + this.getConfiguracion().getNombre());
         Files.write(path, bytes);
     }
-
 
     public void actualizar(Predictor pred) {
         this.configuracion = pred.configuracion;
