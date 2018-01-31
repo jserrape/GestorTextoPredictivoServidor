@@ -176,6 +176,8 @@ public class hiloServidor extends Thread {
         File fichero = new File("./dataSets/" + mac + "/" + nombre);
         if (fichero.delete()) {
             System.out.println("El fichero ha sido borrado satisfactoriamente");
+            fichero = new File("./dataSets/" + mac + "/~" + nombre);
+            fichero.delete();
         } else {
             System.out.println("El fichero no puede ser borrado");
         }
@@ -196,11 +198,11 @@ public class hiloServidor extends Thread {
         this.dataSetCargado = mensaje;
         out.println(dataSetCargado);
 
-        if(hiloSeriabilizar.isAlive()){
+        if (hiloSeriabilizar.isAlive()) {
             System.out.println("Estaba activo, lo interrumpo");
             hiloSeriabilizar.interrumpirHilo();
         }
-        this.hiloSeriabilizar=new HiloSeriabilizacion(mac,mensaje,configuracion,predictor,this);
+        this.hiloSeriabilizar = new HiloSeriabilizacion(mac, mensaje, configuracion, predictor, this);
         hiloSeriabilizar.start();
     }
 
@@ -217,7 +219,7 @@ public class hiloServidor extends Thread {
     }
 
     private void realizarPrediccion(char completa, String mensaje) {
-        if(hiloSeriabilizar.isAlive()){
+        if (hiloSeriabilizar.isAlive()) {
             out.println("");
             return;
         }
