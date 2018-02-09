@@ -157,13 +157,15 @@ public class hiloServidor extends Thread {
         File archivo = new File("./dataSets/" + mac + "/~" + parts[0]);
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(archivo));
-            bw.write(parts[1]);
-            bw.newLine();
             bw.write(parts[2]);
             bw.newLine();
             bw.write(parts[3]);
             bw.newLine();
             bw.write(parts[4]);
+            bw.newLine();
+            bw.write(parts[5]);
+            bw.newLine();
+            bw.write(parts[1]);
             bw.close();
         } catch (IOException ex) {
             Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
@@ -239,9 +241,25 @@ public class hiloServidor extends Thread {
         String[] fichs = new String[ficheros.length / 2];
         for (int i = 0; i < ficheros.length; i++) {
             if (ficheros[i].getName().charAt(0) != '~') {
-                fichs[i] = ficheros[i].getName();
+                String cadena = "---";
+                FileReader ff;
+                try {
+                    ff = new FileReader("./dataSets/" + mac + "/~" + ficheros[i].getName());
+                    BufferedReader bb = new BufferedReader(ff);
+                    for (int x = 0; x < 5; x++) {
+                        cadena = bb.readLine();
+                    }
+                    fichs[i] = ficheros[i].getName() + "#" + cadena;
+                    bb.close();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
             }
         }
         return Arrays.toString(fichs);
     }
+    
 }
