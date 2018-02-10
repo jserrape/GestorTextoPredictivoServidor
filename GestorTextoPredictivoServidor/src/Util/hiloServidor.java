@@ -7,6 +7,9 @@ package Util;
 
 import java.net.*;
 import java.io.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -283,6 +286,19 @@ public class hiloServidor extends Thread {
             password += (int) (Math.random() * 9);
         }
         System.out.println("Contraseña: " + password);
+        
+        ConexionBBDD con=new ConexionBBDD();
+        Connection cn=con.conexion();
+        try {
+            PreparedStatement pps=cn.prepareStatement("INSERT INTO usuario (Nombre,Apellidos,Correo,PASS) VALUES(?,?,?,?)");
+            pps.setString(1, nombre);
+            pps.setString(2, apellidos);
+            pps.setString(3, correo);
+            pps.setString(4, password);
+            pps.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         String remitente = "gestor.predictivo@gmail.com";  //Para la dirección nomcuenta@gmail.com
         Properties props = System.getProperties();
