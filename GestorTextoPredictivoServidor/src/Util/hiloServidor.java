@@ -11,6 +11,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Properties;
+import javax.mail.Address;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 public class hiloServidor extends Thread {
 
@@ -111,6 +119,9 @@ public class hiloServidor extends Thread {
                 in.close();
                 socket.close();
                 this.interrupt();
+                break;
+            case '9':
+                enviarCorreoRegistro(mensaje);
                 break;
         }
     }
@@ -261,5 +272,42 @@ public class hiloServidor extends Thread {
         }
         return Arrays.toString(fichs);
     }
-    
+
+    private void enviarCorreoRegistro(String mensaje) {
+        String[] parts = mensaje.split("#");
+        String nombre = parts[0];
+        String apellidos = parts[1];
+        String correo = parts[2];
+        String password = "";
+        for (int i = 0; i < 5; i++) {
+            password += (int) (Math.random() * 9);
+        }
+        System.out.println("Contraseña: " + password);
+
+        String remitente = "gestor.predictivo@gmail.com";  //Para la dirección nomcuenta@gmail.com
+        Properties props = System.getProperties();
+        props.put("mail.smtp.host", "smtp.gmail.com");  //El servidor SMTP de Google
+        props.put("mail.smtp.user", remitente);
+        props.put("mail.smtp.clave", "jcsp0003");    //La clave de la cuenta
+        props.put("mail.smtp.auth", "true");    //Usar autenticación mediante usuario y clave
+        props.put("mail.smtp.starttls.enable", "true"); //Para conectar de manera segura al servidor SMTP
+        props.put("mail.smtp.port", "587"); //El puerto SMTP seguro de Google
+
+        Session session = Session.getDefaultInstance(props);
+        MimeMessage message = new MimeMessage(session);
+        try {
+            message.setFrom(new InternetAddress(remitente));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(correo));   //Se podrían añadir varios de la misma manera
+            message.setSubject("Registro en gestor de texto predictivo");
+            String texto="Hola, "+nombre+" "+apellidos+":\n\nGracias por registrarse, sus datos de inicio de sesión son\n"+  
+                    "       Correo: "+correo+"\n       Contraseña: "+password;
+            message.setText(texto);
+            Transport transport = session.getTransport("smtp");
+            transport.connect("smtp.gmail.com", remitente, "jcsp0003");
+            transport.sendMessage(message, message.getAllRecipients());
+            transport.close();
+        } catch (MessagingException me) {
+            System.out.println("Error");
+        }
+    }
 }
