@@ -12,12 +12,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Properties;
-import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -28,7 +26,7 @@ import javax.mail.internet.MimeMessage;
 public class hiloServidor extends Thread {
 
     private Socket socket = null;
-    private String mac;
+    private String identificadorUsuario;
     private PrintWriter out;
     private BufferedReader in;
 
@@ -58,12 +56,12 @@ public class hiloServidor extends Thread {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             //Verifico que se ha establecido conexion
-            out.println("Conexion correcta con el servidor");
+            //out.println("Conexion correcta con el servidor");
 
             //Compruebo si tengo dataSets suyos
-            mac = in.readLine();
-            out.println("mac recibida");
-            System.out.println("El cliente tiene la mac: " + mac);
+            //mac = in.readLine();
+            //out.println("mac recibida");
+            //System.out.println("El cliente tiene la mac: " + mac);
 
             String mensaje;
 
@@ -80,7 +78,7 @@ public class hiloServidor extends Thread {
             out.close();
             in.close();
             socket.close();
-            System.out.println("Cierro la conexion del cliente " + mac);
+            System.out.println("Cierro la conexion del cliente " + identificadorUsuario);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -88,6 +86,9 @@ public class hiloServidor extends Thread {
 
     private void elegirAccion(char accion, String mensaje) throws IOException {
         switch (accion) {
+            case '0':
+                this.desconectar();
+                break;
             case '1':
                 System.out.println("Cliente solicitando lista de dataSets");
                 comprobarDataSet();
@@ -153,14 +154,14 @@ public class hiloServidor extends Thread {
     }
 
     private boolean comprobarDataSet2() {
-        String sDirectorio = "./dataSets/" + mac;
+        String sDirectorio = "./dataSets/" + identificadorUsuario;
         File f = new File(sDirectorio);
 
         if (f.exists()) {
             return true;
         } else {
             System.out.println("Directorio mac creado");
-            File directorio = new File("./dataSets/" + mac);
+            File directorio = new File("./dataSets/" + identificadorUsuario);
             directorio.mkdir();
             return false;
         }
@@ -168,14 +169,14 @@ public class hiloServidor extends Thread {
 
     private void crearDataSet(String nombre) {
         String[] parts = nombre.split("#");
-        File fich = new File("./dataSets/" + mac + "/" + parts[0]);
+        File fich = new File("./dataSets/" + identificadorUsuario + "/" + parts[0]);
         try {
             fich.createNewFile();
         } catch (IOException ex) {
             Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        File archivo = new File("./dataSets/" + mac + "/~" + parts[0]);
+        File archivo = new File("./dataSets/" + identificadorUsuario + "/~" + parts[0]);
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(archivo));
             bw.write(parts[2]);
@@ -191,15 +192,14 @@ public class hiloServidor extends Thread {
         } catch (IOException ex) {
             Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 
     private void eliminarDataSet(String nombre) {
         System.out.println("BORRO DATASET");
-        File fichero = new File("./dataSets/" + mac + "/" + nombre);
+        File fichero = new File("./dataSets/" + identificadorUsuario + "/" + nombre);
         if (fichero.delete()) {
             System.out.println("El fichero ha sido borrado satisfactoriamente");
-            fichero = new File("./dataSets/" + mac + "/~" + nombre);
+            fichero = new File("./dataSets/" + identificadorUsuario + "/~" + nombre);
             fichero.delete();
         } else {
             System.out.println("El fichero no puede ser borrado");
@@ -225,7 +225,7 @@ public class hiloServidor extends Thread {
             System.out.println("Estaba activo, lo interrumpo");
             hiloSeriabilizar.interrumpirHilo();
         }
-        this.hiloSeriabilizar = new HiloSeriabilizacion(mac, mensaje, configuracion, predictor, this);
+        this.hiloSeriabilizar = new HiloSeriabilizacion(identificadorUsuario, mensaje, configuracion, predictor, this);
         hiloSeriabilizar.start();
     }
 
@@ -254,7 +254,7 @@ public class hiloServidor extends Thread {
     }
 
     private String getDataSets() {
-        String sDirectorio = "./dataSets/" + mac;
+        String sDirectorio = "./dataSets/" + identificadorUsuario;
         File f = new File(sDirectorio);
 
         File[] ficheros = f.listFiles();
@@ -265,7 +265,7 @@ public class hiloServidor extends Thread {
                 String cadena = "---";
                 FileReader ff;
                 try {
-                    ff = new FileReader("./dataSets/" + mac + "/~" + ficheros[i].getName());
+                    ff = new FileReader("./dataSets/" + identificadorUsuario + "/~" + ficheros[i].getName());
                     BufferedReader bb = new BufferedReader(ff);
                     for (int x = 0; x < 5; x++) {
                         cadena = bb.readLine();
@@ -287,8 +287,6 @@ public class hiloServidor extends Thread {
         String[] parts = mensaje.split("#");
 
         String sql = "SELECT * FROM usuario WHERE Correo='" + parts[0] + "' AND PASS='" + parts[1] + "'";
-        String datos[] = new String[5];
-
         try {
             ConexionBBDD con = new ConexionBBDD();
             Connection cn = con.conexion();
@@ -296,13 +294,13 @@ public class hiloServidor extends Thread {
             ResultSet rs = st.executeQuery(sql);
 
             if (rs.next()) {
-                System.out.println("Usuario registrado");
                 out.println("1");
+                System.out.println("Usuario registrado con correo:"+rs.getString(3));
+                this.identificadorUsuario=rs.getString(3);
             } else {
                 System.out.println("Usuario o contraseña erroneos");
                 out.println("-1");
             }
-
         } catch (SQLException ex) {
             Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
         }
