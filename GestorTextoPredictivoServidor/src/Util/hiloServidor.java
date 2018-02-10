@@ -9,7 +9,9 @@ import java.net.*;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -117,16 +119,21 @@ public class hiloServidor extends Thread {
                 realizarPrediccion(mensaje.charAt(0), mensaje.substring(1, mensaje.length()));
                 break;
             case '8':
-                System.out.println("Cliente solicitando interrumpir la conexion");
-                out.close();
-                in.close();
-                socket.close();
-                this.interrupt();
+                System.out.println("Cliente solicitando login");
+                login(mensaje);
                 break;
             case '9':
-                enviarCorreoRegistro(mensaje);
+                System.out.println("Cliente solicitando registro");
+                registro(mensaje);
                 break;
         }
+    }
+
+    private void desconectar() throws IOException {
+        out.close();
+        in.close();
+        socket.close();
+        this.interrupt();
     }
 
     private void comprobarDataSet() {
@@ -276,7 +283,33 @@ public class hiloServidor extends Thread {
         return Arrays.toString(fichs);
     }
 
-    private void enviarCorreoRegistro(String mensaje) {
+    private void login(String mensaje) {
+        String[] parts = mensaje.split("#");
+
+        String sql = "SELECT * FROM usuario WHERE Correo='" + parts[0] + "' AND PASS='" + parts[1] + "'";
+        String datos[] = new String[5];
+
+        try {
+            ConexionBBDD con = new ConexionBBDD();
+            Connection cn = con.conexion();
+            Statement st = cn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            if (rs.next()) {
+                System.out.println("Usuario registrado");
+                out.println("1");
+            } else {
+                System.out.println("Usuario o contraseña erroneos");
+                out.println("-1");
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    private void registro(String mensaje) {
         String[] parts = mensaje.split("#");
         String nombre = parts[0];
         String apellidos = parts[1];
@@ -286,11 +319,19 @@ public class hiloServidor extends Thread {
             password += (int) (Math.random() * 9);
         }
         System.out.println("Contraseña: " + password);
+
+        if (usuarioYaRegistrado(parts[2])) {
+            System.out.println("Envio -1");
+            out.println("-1");
+            return;
+        }
+
+        System.out.println("GOOOOOOOOOOOOO");
         
-        ConexionBBDD con=new ConexionBBDD();
-        Connection cn=con.conexion();
+        ConexionBBDD con = new ConexionBBDD();
+        Connection cn = con.conexion();
         try {
-            PreparedStatement pps=cn.prepareStatement("INSERT INTO usuario (Nombre,Apellidos,Correo,PASS) VALUES(?,?,?,?)");
+            PreparedStatement pps = cn.prepareStatement("INSERT INTO usuario (Nombre,Apellidos,Correo,Pass) VALUES(?,?,?,?)");
             pps.setString(1, nombre);
             pps.setString(2, apellidos);
             pps.setString(3, correo);
@@ -299,6 +340,9 @@ public class hiloServidor extends Thread {
         } catch (SQLException ex) {
             Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        System.out.println("Envio 1");
+        out.println("1"); //<---- Contesto diciendo que ha ido bien el registro
 
         String remitente = "gestor.predictivo@gmail.com";  //Para la dirección nomcuenta@gmail.com
         Properties props = System.getProperties();
@@ -315,8 +359,8 @@ public class hiloServidor extends Thread {
             message.setFrom(new InternetAddress(remitente));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(correo));   //Se podrían añadir varios de la misma manera
             message.setSubject("Registro en gestor de texto predictivo");
-            String texto="Hola, "+nombre+" "+apellidos+":\n\nGracias por registrarse, sus datos de inicio de sesión son\n"+  
-                    "       Correo: "+correo+"\n       Contraseña: "+password;
+            String texto = "Hola, " + nombre + " " + apellidos + ":\n\nGracias por registrarse, sus datos de inicio de sesión son\n"
+                    + "       Correo: " + correo + "\n       Contraseña: " + password;
             message.setText(texto);
             Transport transport = session.getTransport("smtp");
             transport.connect("smtp.gmail.com", remitente, "jcsp0003");
@@ -325,5 +369,26 @@ public class hiloServidor extends Thread {
         } catch (MessagingException me) {
             System.out.println("Error");
         }
+    }
+
+    private boolean usuarioYaRegistrado(String mail) {
+        String sql = "SELECT * FROM usuario WHERE Correo='" + mail + "'";
+        System.out.println(sql);
+        try {
+            ConexionBBDD con = new ConexionBBDD();
+            Connection cn = con.conexion();
+            Statement st = cn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            if (rs.next()) {
+                System.out.println("Usuario registrado");
+                return true;
+            } else {
+                System.out.println("Usuario no registrado");
+                return false;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
     }
 }
