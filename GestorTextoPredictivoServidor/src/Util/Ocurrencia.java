@@ -9,29 +9,44 @@ import java.io.Serializable;
 
 /**
  *
- * @author Xenahort
+ * @author jcsp0003
  */
-public class Ocurrencia implements Serializable{
+public class Ocurrencia implements Serializable {
 
     private int n;
     private final String prediccion;
 
+    /**
+     * Constructor por defecto de la clase Ocurrencia
+     */
     public Ocurrencia() {
         this.n = 0;
         this.prediccion = "";
     }
 
-    @Override
-    public String toString(){
-        return prediccion+" "+n;
-    }
-    
-    
+    /**
+     * Constructor parametrizado de la clase Ocurrencia
+     * 
+     * @param pred Predicción nueva
+     */
     public Ocurrencia(String pred) {
         this.n = 1;
         this.prediccion = pred;
     }
 
+    /**
+     * Concatena la predicción y el número de repeticiones
+     *
+     * @return Concatenación de la predicción y el número de repeticiones
+     */
+    @Override
+    public String toString() {
+        return prediccion + " " + n;
+    }
+
+    /**
+     * Aumenta el número de ocurrencias de la predicción en uno
+     */
     public void nuevaOcurrencia() {
         ++n;
     }

@@ -11,12 +11,17 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Xenahort
+ * @author jcsp0003
  */
 public class ConexionBBDD {
 
     Connection cn;
 
+    /**
+     * Crea una conexion a la bbdd
+     * 
+     * @return Devuelve la conexión
+     */
     public Connection conexion() {
         try {
             Class.forName("com.mysql.jdbc.Driver");

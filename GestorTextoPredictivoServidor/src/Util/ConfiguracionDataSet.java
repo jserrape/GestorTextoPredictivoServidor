@@ -16,26 +16,37 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Xenahort
+ * @author jcsp0003
  */
 public class ConfiguracionDataSet implements Serializable {
 
-    private String mac;
+    private String correo;
     private String nombre;
     private int tamMaxSemilla;
     private int tamMinSemilla;
     private int tamPrediccion;
     private int maxPredicciones;
 
-    public void cambiarConfiguracionDataSet(String mac, String nombre) {
+    /**
+     * Cambia la configuracion
+     * 
+     * @param correo Identificador del dueño del dataSet
+     * @param nombre Nombre del dataSet
+     */
+    public void cambiarConfiguracionDataSet(String correo, String nombre) {
         this.nombre = nombre;
-        this.mac = mac;
-        cargarConfiguracionDataSet(mac);
+        this.correo = correo;
+        cargarConfiguracionDataSet(correo);
     }
 
-    private void cargarConfiguracionDataSet(String mac) {
+    /**
+     * Carga el fichero de configuracion del dataSet
+     * 
+     * @param correo Identificador del dueño del dataSet
+     */
+    private void cargarConfiguracionDataSet(String correo) {
         System.out.print("Leyendo el fichero de configuracion");
-        File archivo = new File("./dataSets/" + mac + "/~" + getNombre());
+        File archivo = new File("./dataSets/" + correo + "/~" + getNombre());
 
         try {
             FileReader fr = new FileReader(archivo);
@@ -93,14 +104,7 @@ public class ConfiguracionDataSet implements Serializable {
      * @return the mac
      */
     public String getMac() {
-        return mac;
+        return correo;
     }
 
-    public void mostrar() {
-        System.out.println("nombre " + nombre);
-        System.out.println("tamMaxSemilla " + tamMaxSemilla);
-        System.out.println("tamMinSemilla " + tamMinSemilla);
-        System.out.println("tamPrediccion " + tamPrediccion);
-        System.out.println("maxPredicciones " + maxPredicciones);
-    }
 }

@@ -13,22 +13,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
- * @author Xenahort
+ * @author jcsp0003
  */
 public class Predictor implements Serializable {
 
     private ConfiguracionDataSet configuracion;
     private Map<String, ArrayList<Ocurrencia>>[] almacenesSemilla;
 
+    /**
+     * Constructor parametrizado de la clase Predictor
+     * 
+     * @param conf Configuración del conjunto de datos
+     */
     public Predictor(ConfiguracionDataSet conf) {
         this.configuracion = conf;
         this.almacenesSemilla = new Map[this.configuracion.getTamMaxSemilla() + 1];
@@ -37,6 +39,12 @@ public class Predictor implements Serializable {
         }
     }
 
+    /**
+     * Inserta una nueva cadena en el conjunto de datos
+     * 
+     * @param textoFichero Nueva cadena a insertar
+     * @throws IOException Excepción de E/S
+     */
     public void insertarTexto(String textoFichero) throws IOException {
         //Inserto
         for (int i = 1; i < this.getConfiguracion().getTamMaxSemilla() + 1; i++) {
@@ -50,6 +58,12 @@ public class Predictor implements Serializable {
         seriabilizar();
     }
 
+    /**
+     * Inserta una cadena de texto en un almacén determinado
+     * 
+     * @param textoFichero Cadena de texto a almacenar
+     * @param almacen Almacen en el que guardar el texto
+     */
     public void insertarTexto(String textoFichero, int almacen) {
         //System.out.println("Voy a insertar texto en el almacen: " + almacen);
         String conjuntoSemilla, conjuntoPrediccion;
@@ -90,6 +104,12 @@ public class Predictor implements Serializable {
         }
     }
 
+    /**
+     * Busca la prediccion y aumenta sus ocurrencias, en caso de no existir la crea
+     * 
+     * @param arr Array de ocurrencias de la semilla
+     * @param pred Prediccion
+     */
     private void nuevaPrediccion(ArrayList<Ocurrencia> arr, String pred) {
         for (int i = 0; i < arr.size(); i++) {
             if (arr.get(i).getPrediccion().equals(pred)) {
@@ -100,6 +120,13 @@ public class Predictor implements Serializable {
         arr.add(new Ocurrencia(pred));
     }
 
+    /**
+     * Realiza una prediccion
+     * 
+     * @param completa Indica si la semilla está acabada o no
+     * @param texto Semilla a partir de la cual predecir
+     * @return Predicciones
+     */
     public String realizarPrediccion(char completa, String texto) {
         if (completa == '1') {
             System.out.println("Semilla acabada");
@@ -182,6 +209,11 @@ public class Predictor implements Serializable {
         }
     }
 
+    /**
+     * Seriabiliza el conjunto de datos
+     * 
+     * @throws IOException Excención de error en E/S
+     */
     public void seriabilizar() throws IOException {
         ByteArrayOutputStream bs = new ByteArrayOutputStream();
         ObjectOutputStream os = new ObjectOutputStream(bs);
@@ -192,6 +224,11 @@ public class Predictor implements Serializable {
         Files.write(path, bytes);
     }
 
+    /**
+     * Actualiza las configuraciones del predictor
+     * 
+     * @param pred Predictor nuevo
+     */
     public void actualizar(Predictor pred) {
         this.configuracion = pred.configuracion;
         this.almacenesSemilla = pred.almacenesSemilla;

@@ -23,7 +23,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-public class hiloServidor extends Thread {
+public class hiloCliente extends Thread {
 
     private Socket socket = null;
     private String identificadorUsuario;
@@ -36,7 +36,12 @@ public class hiloServidor extends Thread {
 
     private HiloSeriabilizacion hiloSeriabilizar;
 
-    public hiloServidor(Socket socket) {
+    /**
+     * Constructor parametrizado de la clase hiloCliente
+     *
+     * @param socket Socket de la conexion
+     */
+    public hiloCliente(Socket socket) {
         super("HiloServidor");
         this.dataSetCargado = "";
         this.socket = socket;
@@ -44,27 +49,21 @@ public class hiloServidor extends Thread {
         try {
             out = new PrintWriter(socket.getOutputStream(), true);
         } catch (IOException ex) {
-            Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
         predictor = new Predictor(this.configuracion);
         hiloSeriabilizar = new HiloSeriabilizacion();
     }
 
+    /**
+     * Función de lectura de peticiones del cliente
+     */
     @Override
     public void run() {
         try {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            //Verifico que se ha establecido conexion
-            //out.println("Conexion correcta con el servidor");
-
-            //Compruebo si tengo dataSets suyos
-            //mac = in.readLine();
-            //out.println("mac recibida");
-            //System.out.println("El cliente tiene la mac: " + mac);
-
             String mensaje;
-
             while ((mensaje = in.readLine()) != null) {
                 System.out.println("Mensaje del cliente: " + mensaje);
                 if (mensaje.length() == 1) {
@@ -84,6 +83,13 @@ public class hiloServidor extends Thread {
         }
     }
 
+    /**
+     * Función que elige una accion segun el mensaje enviado por el cliente
+     *
+     * @param accion Carácter que indica que accion realizar
+     * @param mensaje Mensaje del cliente
+     * @throws IOException Error en E/S
+     */
     private void elegirAccion(char accion, String mensaje) throws IOException {
         switch (accion) {
             case '0':
@@ -130,6 +136,11 @@ public class hiloServidor extends Thread {
         }
     }
 
+    /**
+     * Se desconecta del cliente
+     *
+     * @throws IOException Error en E/S
+     */
     private void desconectar() throws IOException {
         out.close();
         in.close();
@@ -137,6 +148,9 @@ public class hiloServidor extends Thread {
         this.interrupt();
     }
 
+    /**
+     * Conprueba los conjuntos de dtaos del cliente
+     */
     private void comprobarDataSet() {
         if (comprobarDataSet2()) {
             String contenido = getDataSets();
@@ -153,6 +167,11 @@ public class hiloServidor extends Thread {
         }
     }
 
+    /**
+     * Comprueba si el cliente tiene directorio base
+     *
+     * @return True o False en función de si tiene directorio o no
+     */
     private boolean comprobarDataSet2() {
         String sDirectorio = "./dataSets/" + identificadorUsuario;
         File f = new File(sDirectorio);
@@ -167,13 +186,18 @@ public class hiloServidor extends Thread {
         }
     }
 
+    /**
+     * Crea un nuevo conjunto de datos
+     *
+     * @param nombre Nombre del conjunto
+     */
     private void crearDataSet(String nombre) {
         String[] parts = nombre.split("#");
         File fich = new File("./dataSets/" + identificadorUsuario + "/" + parts[0]);
         try {
             fich.createNewFile();
         } catch (IOException ex) {
-            Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         File archivo = new File("./dataSets/" + identificadorUsuario + "/~" + parts[0]);
@@ -190,10 +214,15 @@ public class hiloServidor extends Thread {
             bw.write(parts[1]);
             bw.close();
         } catch (IOException ex) {
-            Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
+    /**
+     * Elimina un dataSet
+     *
+     * @param nombre Nombre del dataSet a borrar
+     */
     private void eliminarDataSet(String nombre) {
         System.out.println("BORRO DATASET");
         File fichero = new File("./dataSets/" + identificadorUsuario + "/" + nombre);
@@ -206,6 +235,9 @@ public class hiloServidor extends Thread {
         }
     }
 
+    /**
+     * Comprueba el dataSet cargado
+     */
     private void dataSetCargado() {
         if ("".equals(dataSetCargado)) {
             System.out.println("No tiene ningun dataSet cargado");
@@ -216,6 +248,11 @@ public class hiloServidor extends Thread {
         }
     }
 
+    /**
+     * Carga un dataSet
+     *
+     * @param mensaje Nombre del dataSet a cargar
+     */
     private void cargarDataSet(String mensaje) {
         System.out.println(mensaje);
         this.dataSetCargado = mensaje;
@@ -229,18 +266,40 @@ public class hiloServidor extends Thread {
         hiloSeriabilizar.start();
     }
 
+    /**
+     * Cambia la configuracion del predictor
+     *
+     * @param configuracion Nueva configuracion
+     */
     public void cambiarConfiguracion(ConfiguracionDataSet configuracion) {
         this.configuracion = configuracion;
     }
 
+    /**
+     * Cambia el predictor
+     *
+     * @param predictor Nuevo predictor
+     */
     public void cambiarPredictor(Predictor predictor) {
         this.predictor = predictor;
     }
 
+    /**
+     * Carga un texto en el conjunto de datos cargado
+     *
+     * @param mensaje Texto a cargar
+     * @throws IOException Error en E/S
+     */
     private void cargarTexto(String mensaje) throws IOException {
         predictor.insertarTexto(mensaje);
     }
 
+    /**
+     * Realiza una predicción
+     *
+     * @param completa Indica si la predicción está completa
+     * @param mensaje Semilla en base a la que predecir
+     */
     private void realizarPrediccion(char completa, String mensaje) {
         if (hiloSeriabilizar.isAlive()) {
             out.println("");
@@ -253,6 +312,11 @@ public class hiloServidor extends Thread {
         out.println(pred);
     }
 
+    /**
+     * Obtiene los dataSets del cliente
+     *
+     * @return Lista con los dataSets
+     */
     private String getDataSets() {
         String sDirectorio = "./dataSets/" + identificadorUsuario;
         File f = new File(sDirectorio);
@@ -273,9 +337,9 @@ public class hiloServidor extends Thread {
                     fichs[i] = ficheros[i].getName() + "#" + cadena;
                     bb.close();
                 } catch (FileNotFoundException ex) {
-                    Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {
-                    Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
             }
@@ -283,9 +347,13 @@ public class hiloServidor extends Thread {
         return Arrays.toString(fichs);
     }
 
+    /**
+     * Realiza el login del cliente
+     *
+     * @param mensaje Datos de inicio de sesión del cliente
+     */
     private void login(String mensaje) {
         String[] parts = mensaje.split("#");
-
         String sql = "SELECT * FROM usuario WHERE Correo='" + parts[0] + "' AND PASS='" + parts[1] + "'";
         try {
             ConexionBBDD con = new ConexionBBDD();
@@ -295,18 +363,23 @@ public class hiloServidor extends Thread {
 
             if (rs.next()) {
                 out.println("1");
-                System.out.println("Usuario registrado con correo:"+rs.getString(3));
-                this.identificadorUsuario=rs.getString(3);
+                System.out.println("Usuario registrado con correo:" + rs.getString(3));
+                this.identificadorUsuario = rs.getString(3);
             } else {
                 System.out.println("Usuario o contraseña erroneos");
                 out.println("-1");
             }
         } catch (SQLException ex) {
-            Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
 
+    /**
+     * Registra a un nuevo cliente
+     *
+     * @param mensaje Datos de creación de la cuenta
+     */
     private void registro(String mensaje) {
         String[] parts = mensaje.split("#");
         String nombre = parts[0];
@@ -325,7 +398,7 @@ public class hiloServidor extends Thread {
         }
 
         System.out.println("GOOOOOOOOOOOOO");
-        
+
         ConexionBBDD con = new ConexionBBDD();
         Connection cn = con.conexion();
         try {
@@ -336,7 +409,7 @@ public class hiloServidor extends Thread {
             pps.setString(4, password);
             pps.executeUpdate();
         } catch (SQLException ex) {
-            Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         System.out.println("Envio 1");
@@ -369,6 +442,13 @@ public class hiloServidor extends Thread {
         }
     }
 
+    /**
+     * Comprueba si un usuario ya está registrado
+     *
+     * @param mail Identificador único de los usuarios
+     * @return Valor true o false en función de si el usuario está registrado o
+     * no
+     */
     private boolean usuarioYaRegistrado(String mail) {
         String sql = "SELECT * FROM usuario WHERE Correo='" + mail + "'";
         System.out.println(sql);
@@ -385,7 +465,7 @@ public class hiloServidor extends Thread {
                 return false;
             }
         } catch (SQLException ex) {
-            Logger.getLogger(hiloServidor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }
