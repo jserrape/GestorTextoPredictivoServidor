@@ -22,6 +22,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import org.apache.commons.codec.digest.DigestUtils;
 
 public class hiloCliente extends Thread {
 
@@ -406,7 +407,7 @@ public class hiloCliente extends Thread {
             pps.setString(1, nombre);
             pps.setString(2, apellidos);
             pps.setString(3, correo);
-            pps.setString(4, password);
+            pps.setString(4, DigestUtils.sha1Hex(password));
             pps.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
