@@ -34,7 +34,10 @@ public class hiloCliente extends Thread {
     private String dataSetCargado;
     private ConfiguracionDataSet configuracion;
     private Predictor predictor;
-
+    
+    private String remitente = "gestor.predictivo@gmail.com";  
+    private String passw="jcsp0003";
+    
     private HiloSeriabilizacion hiloSeriabilizar;
 
     /**
@@ -156,14 +159,11 @@ public class hiloCliente extends Thread {
         if (comprobarDataSet2()) {
             String contenido = getDataSets();
             if (!"[]".equals(contenido)) {
-                System.out.println("Hay ficheros: " + contenido);
                 out.println(contenido);
             } else {
-                System.out.println("NO HAY NADA");
                 out.println("-1");
             }
         } else {
-            System.out.println("ELSE 1");
             out.println("-1");
         }
     }
@@ -180,7 +180,6 @@ public class hiloCliente extends Thread {
         if (f.exists()) {
             return true;
         } else {
-            System.out.println("Directorio mac creado");
             File directorio = new File("./dataSets/" + identificadorUsuario);
             directorio.mkdir();
             return false;
@@ -225,14 +224,10 @@ public class hiloCliente extends Thread {
      * @param nombre Nombre del dataSet a borrar
      */
     private void eliminarDataSet(String nombre) {
-        System.out.println("BORRO DATASET");
         File fichero = new File("./dataSets/" + identificadorUsuario + "/" + nombre);
         if (fichero.delete()) {
-            System.out.println("El fichero ha sido borrado satisfactoriamente");
             fichero = new File("./dataSets/" + identificadorUsuario + "/~" + nombre);
             fichero.delete();
-        } else {
-            System.out.println("El fichero no puede ser borrado");
         }
     }
 
@@ -241,10 +236,8 @@ public class hiloCliente extends Thread {
      */
     private void dataSetCargado() {
         if ("".equals(dataSetCargado)) {
-            System.out.println("No tiene ningun dataSet cargado");
             out.println("-1");
         } else {
-            System.out.println("Tiene cargado el dataSet " + dataSetCargado);
             out.println(dataSetCargado);
         }
     }
@@ -260,7 +253,6 @@ public class hiloCliente extends Thread {
         out.println(dataSetCargado);
 
         if (hiloSeriabilizar.isAlive()) {
-            System.out.println("Estaba activo, lo interrumpo");
             hiloSeriabilizar.interrumpirHilo();
         }
         this.hiloSeriabilizar = new HiloSeriabilizacion(identificadorUsuario, mensaje, configuracion, predictor, this);
@@ -364,10 +356,8 @@ public class hiloCliente extends Thread {
 
             if (rs.next()) {
                 out.println("1");
-                System.out.println("Usuario registrado con correo:" + rs.getString(3));
                 this.identificadorUsuario = rs.getString(3);
             } else {
-                System.out.println("Usuario o contraseña erroneos");
                 out.println("-1");
             }
         } catch (SQLException ex) {
@@ -390,15 +380,12 @@ public class hiloCliente extends Thread {
         for (int i = 0; i < 5; i++) {
             password += (int) (Math.random() * 9);
         }
-        System.out.println("Contraseña: " + password);
+
 
         if (usuarioYaRegistrado(parts[2])) {
-            System.out.println("Envio -1");
             out.println("-1");
             return;
         }
-
-        System.out.println("GOOOOOOOOOOOOO");
 
         ConexionBBDD con = new ConexionBBDD();
         Connection cn = con.conexion();
@@ -407,20 +394,19 @@ public class hiloCliente extends Thread {
             pps.setString(1, nombre);
             pps.setString(2, apellidos);
             pps.setString(3, correo);
-            pps.setString(4, DigestUtils.sha1Hex(password));
+            pps.setString(4, /*DigestUtils.sha1Hex*/(password));
             pps.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        System.out.println("Envio 1");
         out.println("1"); //<---- Contesto diciendo que ha ido bien el registro
 
-        String remitente = "gestor.predictivo@gmail.com";  //Para la dirección nomcuenta@gmail.com
+        
         Properties props = System.getProperties();
         props.put("mail.smtp.host", "smtp.gmail.com");  //El servidor SMTP de Google
         props.put("mail.smtp.user", remitente);
-        props.put("mail.smtp.clave", "jcsp0003");    //La clave de la cuenta
+        props.put("mail.smtp.clave", passw);    //La clave de la cuenta
         props.put("mail.smtp.auth", "true");    //Usar autenticación mediante usuario y clave
         props.put("mail.smtp.starttls.enable", "true"); //Para conectar de manera segura al servidor SMTP
         props.put("mail.smtp.port", "587"); //El puerto SMTP seguro de Google
@@ -452,19 +438,12 @@ public class hiloCliente extends Thread {
      */
     private boolean usuarioYaRegistrado(String mail) {
         String sql = "SELECT * FROM usuario WHERE Correo='" + mail + "'";
-        System.out.println(sql);
         try {
             ConexionBBDD con = new ConexionBBDD();
             Connection cn = con.conexion();
             Statement st = cn.createStatement();
             ResultSet rs = st.executeQuery(sql);
-            if (rs.next()) {
-                System.out.println("Usuario registrado");
-                return true;
-            } else {
-                System.out.println("Usuario no registrado");
-                return false;
-            }
+            return rs.next();
         } catch (SQLException ex) {
             Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
         }

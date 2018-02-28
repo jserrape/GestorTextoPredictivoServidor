@@ -65,15 +65,12 @@ public class Predictor implements Serializable {
      * @param almacen Almacen en el que guardar el texto
      */
     public void insertarTexto(String textoFichero, int almacen) {
-        //System.out.println("Voy a insertar texto en el almacen: " + almacen);
         String conjuntoSemilla, conjuntoPrediccion;
         String[] frases, palabras;
 
         frases = textoFichero.split("\\.");
         for (String frase : frases) {
             palabras = frase.split("\\s+");
-            //System.out.println("palabras:");
-            //System.out.println(Arrays.toString(palabras));
             for (int j = 0; j < palabras.length - almacen; j++) {
                 if ("".equals(palabras[j])) {
                     continue;
@@ -129,14 +126,12 @@ public class Predictor implements Serializable {
      */
     public String realizarPrediccion(char completa, String texto) {
         if (completa == '1') {
-            System.out.println("Semilla acabada");
             ArrayList<String> arr = new ArrayList();
             String[] palabras = texto.split("\\s+");
             int limite;
             String semilla;
 
             for (int i = this.getConfiguracion().getTamMaxSemilla(); i > 0; i--) {
-                //System.out.println("---------Semilla tamaño: " + i + "  -----------");
                 limite = 0;
                 semilla = "";
                 for (int j = palabras.length - 1; j >= 0; j--) {
@@ -159,7 +154,6 @@ public class Predictor implements Serializable {
                         if (!arr.contains(almacenesSemilla[i].get(semilla).get(z).getPrediccion())) {
                             arr.add(almacenesSemilla[i].get(semilla).get(z).getPrediccion());
                             if (arr.size() == this.getConfiguracion().getMaxPredicciones()) {
-                                System.out.println(arr.toString());
                                 return arr.toString();
                             }
                         }
@@ -168,13 +162,11 @@ public class Predictor implements Serializable {
             }
             return arr.toString();
         } else {
-            System.out.println("Semilla no acabada");
             ArrayList<String> arr = new ArrayList();
             String[] palabras = texto.split("\\s+");
             int limite;
             String semillaBase, semillaInacabada;
             for (int i = this.getConfiguracion().getTamMaxSemilla(); i > 0; i--) {
-                //System.out.println("---------Semilla tamaño: " + i + "  -----------");
                 limite = 0;
                 semillaBase = "";
                 semillaInacabada = palabras[palabras.length - 1];
@@ -188,7 +180,6 @@ public class Predictor implements Serializable {
                         break;
                     }
                 }
-                System.out.println("Semillabase:" + semillaBase + "TamSemilla:" + i);
                 if (!"".equals(semillaBase)) { // Situación semillaBase no nula
                     semillaBase = semillaBase.substring(0, semillaBase.length() - 1);
                     if (almacenesSemilla[i].containsKey(semillaBase)) {

@@ -56,7 +56,6 @@ public class HiloSeriabilizacion extends Thread {
      */
     @Override
     public void run() {
-        System.out.println("Comienzo del hilo de seriabilizacion");
         String sFichero = "./dataSets/" + correo + "/" + mensaje;
         File fichero = new File(sFichero);
 
@@ -83,7 +82,6 @@ public class HiloSeriabilizacion extends Thread {
             this.configuracion = predictor.getConfiguracion();
             this.hiloServer.cambiarConfiguracion(configuracion);
         }
-        System.out.println("Final del hilo de seriabilizacion");
     }
 
     /**

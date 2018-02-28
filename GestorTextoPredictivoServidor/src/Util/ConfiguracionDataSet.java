@@ -45,7 +45,6 @@ public class ConfiguracionDataSet implements Serializable {
      * @param correo Identificador del dueño del dataSet
      */
     private void cargarConfiguracionDataSet(String correo) {
-        System.out.print("Leyendo el fichero de configuracion");
         File archivo = new File("./dataSets/" + correo + "/~" + getNombre());
 
         try {

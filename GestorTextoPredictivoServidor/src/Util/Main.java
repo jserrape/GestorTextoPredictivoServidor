@@ -28,11 +28,7 @@ public class Main {
     private static void comprobarDirectorioDataSet() {
         File directorio = new File("./dataSets");
         if (!directorio.exists()) {
-            System.out.println("El directorio de dataSets no existia");
             directorio.mkdir();
-        } else {
-            System.out.println("El directorio de dataSets SI existia");
         }
-
     }
 }
