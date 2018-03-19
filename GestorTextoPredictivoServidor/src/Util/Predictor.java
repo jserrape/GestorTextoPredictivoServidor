@@ -28,7 +28,7 @@ public class Predictor implements Serializable {
 
     /**
      * Constructor parametrizado de la clase Predictor
-     * 
+     *
      * @param conf Configuración del conjunto de datos
      */
     public Predictor(ConfiguracionDataSet conf) {
@@ -41,7 +41,7 @@ public class Predictor implements Serializable {
 
     /**
      * Inserta una nueva cadena en el conjunto de datos
-     * 
+     *
      * @param textoFichero Nueva cadena a insertar
      * @throws IOException Excepción de E/S
      */
@@ -60,7 +60,7 @@ public class Predictor implements Serializable {
 
     /**
      * Inserta una cadena de texto en un almacén determinado
-     * 
+     *
      * @param textoFichero Cadena de texto a almacenar
      * @param almacen Almacen en el que guardar el texto
      */
@@ -102,8 +102,9 @@ public class Predictor implements Serializable {
     }
 
     /**
-     * Busca la prediccion y aumenta sus ocurrencias, en caso de no existir la crea
-     * 
+     * Busca la prediccion y aumenta sus ocurrencias, en caso de no existir la
+     * crea
+     *
      * @param arr Array de ocurrencias de la semilla
      * @param pred Prediccion
      */
@@ -119,7 +120,7 @@ public class Predictor implements Serializable {
 
     /**
      * Realiza una prediccion
-     * 
+     *
      * @param completa Indica si la semilla está acabada o no
      * @param texto Semilla a partir de la cual predecir
      * @return Predicciones
@@ -130,6 +131,7 @@ public class Predictor implements Serializable {
             String[] palabras = texto.split("\\s+");
             int limite;
             String semilla;
+            boolean contain;
 
             for (int i = this.getConfiguracion().getTamMaxSemilla(); i > 0; i--) {
                 limite = 0;
@@ -151,11 +153,19 @@ public class Predictor implements Serializable {
 
                 if (almacenesSemilla[i].containsKey(semilla)) {
                     for (int z = 0; z < almacenesSemilla[i].get(semilla).size(); z++) {
-                        if (!arr.contains(almacenesSemilla[i].get(semilla).get(z).getPrediccion())) {
+                        contain = false;
+                        for (int m = 0; m < arr.size(); m++) {
+                            if (arr.get(m).equals(almacenesSemilla[i].get(semilla).get(z).getPrediccion())) {
+                                contain = true;
+                            }
+                        }
+                        if (!contain) {
                             arr.add(almacenesSemilla[i].get(semilla).get(z).getPrediccion());
                             if (arr.size() == this.getConfiguracion().getMaxPredicciones()) {
                                 return arr.toString();
                             }
+                        } else {
+                            System.out.println("Ya contiene " + almacenesSemilla[i].get(semilla).get(z).getPrediccion());
                         }
                     }
                 }
@@ -166,6 +176,8 @@ public class Predictor implements Serializable {
             String[] palabras = texto.split("\\s+");
             int limite;
             String semillaBase, semillaInacabada;
+            boolean contain;
+            
             for (int i = this.getConfiguracion().getTamMaxSemilla(); i > 0; i--) {
                 limite = 0;
                 semillaBase = "";
@@ -185,7 +197,13 @@ public class Predictor implements Serializable {
                     if (almacenesSemilla[i].containsKey(semillaBase)) {
                         for (int j = 0; j < almacenesSemilla[i].get(semillaBase).size(); j++) {
                             if (almacenesSemilla[i].get(semillaBase).get(j).getPrediccion().indexOf(semillaInacabada) == 0) {
-                                if (!arr.contains(almacenesSemilla[i].get(semillaBase).get(j).getPrediccion())) {
+                                contain = false;
+                                for (int m = 0; m < arr.size(); m++) {
+                                    if (arr.get(m).equals(almacenesSemilla[i].get(semillaBase).get(j).getPrediccion())) {
+                                        contain = true;
+                                    }
+                                }
+                                if (!contain) {
                                     arr.add(almacenesSemilla[i].get(semillaBase).get(j).getPrediccion());
                                     if (arr.size() == this.getConfiguracion().getMaxPredicciones()) {
                                         return arr.toString();
@@ -202,7 +220,7 @@ public class Predictor implements Serializable {
 
     /**
      * Seriabiliza el conjunto de datos
-     * 
+     *
      * @throws IOException Excención de error en E/S
      */
     public void seriabilizar() throws IOException {
@@ -217,7 +235,7 @@ public class Predictor implements Serializable {
 
     /**
      * Actualiza las configuraciones del predictor
-     * 
+     *
      * @param pred Predictor nuevo
      */
     public void actualizar(Predictor pred) {
