@@ -51,7 +51,7 @@ public class hiloCliente extends Thread {
     public hiloCliente(Socket socket, String[] args) {
         super("HiloServidor");
         this.args = args;
-        if (args.length == 5) {
+        if (args.length == 6) {
             remitente = args[3];
             passw = args[4];
         } else {
@@ -404,7 +404,7 @@ public class hiloCliente extends Thread {
             pps.setString(1, nombre);
             pps.setString(2, apellidos);
             pps.setString(3, correo);
-            pps.setString(4, /*DigestUtils.sha1Hex*/ (password));
+            pps.setString(4, DigestUtils.sha1Hex(password));
             pps.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
@@ -430,7 +430,7 @@ public class hiloCliente extends Thread {
                     + "       Correo: " + correo + "\n       Contraseña: " + password;
             message.setText(texto);
             Transport transport = session.getTransport("smtp");
-            transport.connect("smtp.gmail.com", remitente, "jcsp0003");
+            transport.connect("smtp.gmail.com", remitente, passw);
             transport.sendMessage(message, message.getAllRecipients());
             transport.close();
         } catch (MessagingException me) {

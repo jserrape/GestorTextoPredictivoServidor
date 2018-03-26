@@ -26,7 +26,7 @@ public class ConexionBBDD {
     public Connection conexion(String args[]) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            if (args.length == 5) {
+            if (args.length == 6) {
                 cn = DriverManager.getConnection("jdbc:mysql://" + args[0] + "/" + args[1], args[2], "");
             } else {
                 cn = DriverManager.getConnection("jdbc:mysql://" + args[0] + "/" + args[1], args[2], args[3]);

@@ -25,27 +25,23 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 //args localhost predictorbbdd root gestor.predictivo@gmail.com jcsp0003
-
 public class Main {
 
-    private static SSLServerSocket serverSocket;
+    private static ServerSocket serverSocket;
+    private static SSLServerSocket SSLserverSocket;
     private static final int port = 4444;
 
     public static void main(String[] args) throws IOException {
-        System.out.println(Arrays.toString(args));
-        try {
-            ssl();
-        } catch (KeyStoreException | FileNotFoundException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | KeyManagementException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
         comprobarDirectorioDataSet();
-
-        Socket socket;
-        System.out.println("Servidor listo");
-        while (true) {
-            socket = serverSocket.accept();
-            System.out.println("Nueva conexion de " + socket);
-            new hiloCliente(socket,args).start();
+        System.out.println(Arrays.toString(args));
+        if ("0".equals(args[args.length - 1])) {
+            noSsl(args);
+        } else {
+            try {
+                ssl(args);
+            } catch (KeyStoreException | FileNotFoundException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | KeyManagementException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
@@ -56,7 +52,18 @@ public class Main {
         }
     }
 
-    private static void ssl() throws KeyStoreException, FileNotFoundException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException, KeyManagementException {
+    private static void noSsl(String[] args) throws IOException {
+        serverSocket = new ServerSocket(4444);
+        Socket socket;
+        System.out.println("Servidor listo sin SSL");
+        while (true) {
+            socket = serverSocket.accept();
+            System.out.println("Nueva conexion de " + socket);
+            new hiloCliente(socket, args).start();
+        }
+    }
+
+    private static void ssl(String[] args) throws KeyStoreException, FileNotFoundException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException, KeyManagementException {
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load(new FileInputStream("certs/server/serverKey.jks"), "servpass".toCharArray());
 
@@ -75,6 +82,14 @@ public class Main {
         sc.init(keyManagers, trustManagers, null);
 
         SSLServerSocketFactory ssf = sc.getServerSocketFactory();
-        serverSocket = (SSLServerSocket) ssf.createServerSocket(port);
+        SSLserverSocket = (SSLServerSocket) ssf.createServerSocket(port);
+
+        Socket socket;
+        System.out.println("Servidor listo con SSL");
+        while (true) {
+            socket = SSLserverSocket.accept();
+            System.out.println("Nueva conexion de " + socket);
+            new hiloCliente(socket, args).start();
+        }
     }
 }
