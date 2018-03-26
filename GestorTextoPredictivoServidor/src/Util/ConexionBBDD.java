@@ -19,21 +19,26 @@ public class ConexionBBDD {
 
     /**
      * Crea una conexion a la bbdd
-     * 
+     *
+     * @param args
      * @return Devuelve la conexión
      */
-    public Connection conexion() {
+    public Connection conexion(String args[]) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            cn = DriverManager.getConnection("jdbc:mysql://localhost/predictorbbdd", "root", "");
+            if (args.length == 5) {
+                cn = DriverManager.getConnection("jdbc:mysql://" + args[0] + "/" + args[1], args[2], "");
+            } else {
+                cn = DriverManager.getConnection("jdbc:mysql://" + args[0] + "/" + args[1], args[2], args[3]);
+            }
             System.out.println("Conexion con la bbdd existosa");
         } catch (ClassNotFoundException | SQLException ex) {
             Logger.getLogger(ConexionBBDD.class.getName()).log(Level.SEVERE, null, ex);
         }
         return cn;
     }
-    
-    Statement createStatement(){
+
+    Statement createStatement() {
         throw new UnsupportedOperationException("No soportado");
     }
 }

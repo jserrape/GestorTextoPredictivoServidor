@@ -13,6 +13,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.KeyManager;
@@ -23,12 +24,15 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+//args localhost predictorbbdd root gestor.predictivo@gmail.com jcsp0003
+
 public class Main {
 
     private static SSLServerSocket serverSocket;
     private static final int port = 4444;
 
     public static void main(String[] args) throws IOException {
+        System.out.println(Arrays.toString(args));
         try {
             ssl();
         } catch (KeyStoreException | FileNotFoundException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException | KeyManagementException ex) {
@@ -41,7 +45,7 @@ public class Main {
         while (true) {
             socket = serverSocket.accept();
             System.out.println("Nueva conexion de " + socket);
-            new hiloCliente(socket).start();
+            new hiloCliente(socket,args).start();
         }
     }
 

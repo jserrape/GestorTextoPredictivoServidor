@@ -34,19 +34,30 @@ public class hiloCliente extends Thread {
     private String dataSetCargado;
     private ConfiguracionDataSet configuracion;
     private Predictor predictor;
-    
-    private String remitente = "gestor.predictivo@gmail.com";  
-    private String passw="jcsp0003";
-    
+
+    private String remitente;
+    private String passw;
+
+    private String args[];
+
     private HiloSeriabilizacion hiloSeriabilizar;
 
     /**
      * Constructor parametrizado de la clase hiloCliente
      *
      * @param socket Socket de la conexion
+     * @param args
      */
-    public hiloCliente(Socket socket) {
+    public hiloCliente(Socket socket, String[] args) {
         super("HiloServidor");
+        this.args = args;
+        if (args.length == 5) {
+            remitente = args[3];
+            passw = args[4];
+        } else {
+            remitente = args[4];
+            passw = args[5];
+        }
         this.dataSetCargado = "";
         this.socket = socket;
         this.configuracion = new ConfiguracionDataSet();
@@ -350,7 +361,7 @@ public class hiloCliente extends Thread {
         String sql = "SELECT * FROM usuario WHERE Correo='" + parts[0] + "' AND PASS='" + parts[1] + "'";
         try {
             ConexionBBDD con = new ConexionBBDD();
-            Connection cn = con.conexion();
+            Connection cn = con.conexion(this.args);
             Statement st = cn.createStatement();
             ResultSet rs = st.executeQuery(sql);
 
@@ -381,20 +392,19 @@ public class hiloCliente extends Thread {
             password += (int) (Math.random() * 9);
         }
 
-
         if (usuarioYaRegistrado(parts[2])) {
             out.println("-1");
             return;
         }
 
         ConexionBBDD con = new ConexionBBDD();
-        Connection cn = con.conexion();
+        Connection cn = con.conexion(this.args);
         try {
             PreparedStatement pps = cn.prepareStatement("INSERT INTO usuario (Nombre,Apellidos,Correo,Pass) VALUES(?,?,?,?)");
             pps.setString(1, nombre);
             pps.setString(2, apellidos);
             pps.setString(3, correo);
-            pps.setString(4, /*DigestUtils.sha1Hex*/(password));
+            pps.setString(4, /*DigestUtils.sha1Hex*/ (password));
             pps.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
@@ -402,7 +412,6 @@ public class hiloCliente extends Thread {
 
         out.println("1"); //<---- Contesto diciendo que ha ido bien el registro
 
-        
         Properties props = System.getProperties();
         props.put("mail.smtp.host", "smtp.gmail.com");  //El servidor SMTP de Google
         props.put("mail.smtp.user", remitente);
@@ -440,7 +449,7 @@ public class hiloCliente extends Thread {
         String sql = "SELECT * FROM usuario WHERE Correo='" + mail + "'";
         try {
             ConexionBBDD con = new ConexionBBDD();
-            Connection cn = con.conexion();
+            Connection cn = con.conexion(this.args);
             Statement st = cn.createStatement();
             ResultSet rs = st.executeQuery(sql);
             return rs.next();
