@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  *
  * @author jcsp0003
  */
-public class HiloSeriabilizacion extends Thread {
+public class HiloSeriabilizacionLectura extends Thread {
 
     private String correo;
     private String mensaje;
@@ -30,7 +30,7 @@ public class HiloSeriabilizacion extends Thread {
     /**
      * Constructor por defecto de HiloSeriabilizacion
      */
-    public HiloSeriabilizacion() {
+    public HiloSeriabilizacionLectura() {
     }
 
     /**
@@ -42,7 +42,7 @@ public class HiloSeriabilizacion extends Thread {
      * @param predictor Clase encargada de gestionar las predicciones
      * @param hiloCliente Hilo que atiende las peticiones de un cliente
      */
-    public HiloSeriabilizacion(String correo, String mensaje, ConfiguracionDataSet configuracion, Predictor predictor, hiloCliente hiloCliente) {
+    public HiloSeriabilizacionLectura(String correo, String mensaje, ConfiguracionDataSet configuracion, Predictor predictor, hiloCliente hiloCliente) {
         this.correo = correo;
         this.mensaje = mensaje;
         this.configuracion = configuracion;
@@ -71,7 +71,7 @@ public class HiloSeriabilizacion extends Thread {
                     predictor.actualizar((Predictor) ois.readObject());
                     this.hiloServer.cambiarPredictor(predictor);
                 } catch (IOException ex) {
-                    Logger.getLogger(HiloSeriabilizacion.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(HiloSeriabilizacionLectura.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 fis.close();
             } catch (FileNotFoundException ex) {
@@ -91,7 +91,7 @@ public class HiloSeriabilizacion extends Thread {
         try {
             fis.close();
         } catch (IOException ex) {
-            Logger.getLogger(HiloSeriabilizacion.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(HiloSeriabilizacionLectura.class.getName()).log(Level.SEVERE, null, ex);
         }
         this.interrupt();
     }

@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  *
  * @author jcsp0003
  */
-public class ConfiguracionDataSet implements Serializable {
+public class ConfiguracionDataSet implements Serializable, Cloneable {
 
     private String correo;
     private String nombre;
@@ -29,7 +29,7 @@ public class ConfiguracionDataSet implements Serializable {
 
     /**
      * Cambia la configuracion
-     * 
+     *
      * @param correo Identificador del dueño del dataSet
      * @param nombre Nombre del dataSet
      */
@@ -39,9 +39,15 @@ public class ConfiguracionDataSet implements Serializable {
         cargarConfiguracionDataSet(correo);
     }
 
+    @Override
+    public ConfiguracionDataSet clone() throws CloneNotSupportedException {
+        ConfiguracionDataSet clon = (ConfiguracionDataSet) super.clone();
+        return clon;
+    }
+
     /**
      * Carga el fichero de configuracion del dataSet
-     * 
+     *
      * @param correo Identificador del dueño del dataSet
      */
     private void cargarConfiguracionDataSet(String correo) {
@@ -100,9 +106,9 @@ public class ConfiguracionDataSet implements Serializable {
     }
 
     /**
-     * @return the mac
+     * @return the correo
      */
-    public String getMac() {
+    public String getCorreo() {
         return correo;
     }
 

@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * @author jcsp0003
  */
-public class Predictor implements Serializable {
+public class Predictor implements Serializable, Cloneable {
 
     private ConfiguracionDataSet configuracion;
     private Map<String, ArrayList<Ocurrencia>>[] almacenesSemilla;
@@ -37,6 +37,12 @@ public class Predictor implements Serializable {
         for (int i = 1; i < this.configuracion.getTamMaxSemilla() + 1; i++) {
             this.almacenesSemilla[i] = new HashMap<>();
         }
+    }
+    
+    @Override
+    public Predictor clone() throws CloneNotSupportedException{
+         Predictor clon = (Predictor) super.clone();
+         return clon;
     }
 
     /**
@@ -55,7 +61,7 @@ public class Predictor implements Serializable {
             almacenesSemilla[i].forEach((k, v) -> Collections.sort(v, (Ocurrencia o1, Ocurrencia o2) -> Integer.valueOf(o2.getN()).compareTo(o1.getN())));
         }
         //Seriabilizo la clase
-        seriabilizar();
+        //seriabilizar();
     }
 
     /**
@@ -229,7 +235,7 @@ public class Predictor implements Serializable {
         os.writeObject(this);
         os.close();
         byte[] bytes = bs.toByteArray();
-        Path path = Paths.get("./dataSets/" + this.getConfiguracion().getMac() + "/" + this.getConfiguracion().getNombre());
+        Path path = Paths.get("./dataSets/" + this.getConfiguracion().getCorreo() + "/" + this.getConfiguracion().getNombre());
         Files.write(path, bytes);
     }
 

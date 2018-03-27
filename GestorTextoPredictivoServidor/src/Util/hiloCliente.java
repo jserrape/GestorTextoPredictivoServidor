@@ -40,7 +40,7 @@ public class hiloCliente extends Thread {
 
     private String args[];
 
-    private HiloSeriabilizacion hiloSeriabilizar;
+    private HiloSeriabilizacionLectura hiloSeriabilizar;
 
     /**
      * Constructor parametrizado de la clase hiloCliente
@@ -67,7 +67,7 @@ public class hiloCliente extends Thread {
             Logger.getLogger(hiloCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
         predictor = new Predictor(this.configuracion);
-        hiloSeriabilizar = new HiloSeriabilizacion();
+        hiloSeriabilizar = new HiloSeriabilizacionLectura();
     }
 
     /**
@@ -92,10 +92,10 @@ public class hiloCliente extends Thread {
             out.close();
             in.close();
             socket.close();
-            System.out.println("Cierro la conexion del cliente " + identificadorUsuario);
         } catch (IOException e) {
-            e.printStackTrace();
+            new HiloSeriabilizacionEscritura(this.predictor, this.configuracion).start();
         }
+        System.out.println("Cierro la conexion del cliente " + identificadorUsuario);
     }
 
     /**
@@ -260,13 +260,15 @@ public class hiloCliente extends Thread {
      */
     private void cargarDataSet(String mensaje) {
         System.out.println(mensaje);
+        new HiloSeriabilizacionEscritura(this.predictor, this.configuracion).start();
+        
         this.dataSetCargado = mensaje;
         out.println(dataSetCargado);
 
         if (hiloSeriabilizar.isAlive()) {
             hiloSeriabilizar.interrumpirHilo();
         }
-        this.hiloSeriabilizar = new HiloSeriabilizacion(identificadorUsuario, mensaje, configuracion, predictor, this);
+        this.hiloSeriabilizar = new HiloSeriabilizacionLectura(identificadorUsuario, mensaje, configuracion, predictor, this);
         hiloSeriabilizar.start();
     }
 
