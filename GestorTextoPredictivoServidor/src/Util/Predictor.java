@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,16 +56,6 @@ public class Predictor implements Serializable, Cloneable {
         HiloAnalisisTextos aux=new HiloAnalisisTextos(this.configuracion,this.almacenesSemilla,textoFichero,this.anteriorAnalisis);
         aux.start();
         this.anteriorAnalisis=aux;
-        //Inserto
-//        for (int i = 1; i < this.getConfiguracion().getTamMaxSemilla() + 1; i++) {
-//            insertarTexto(textoFichero, i);
-//        }
-//        //Ordeno
-//        for (int i = this.getConfiguracion().getTamMaxSemilla(); i > 0; i--) {
-//            almacenesSemilla[i].forEach((k, v) -> Collections.sort(v, (Ocurrencia o1, Ocurrencia o2) -> Integer.valueOf(o2.getN()).compareTo(o1.getN())));
-//        }
-        //Seriabilizo la clase
-        //seriabilizar();
     }
 
     /**

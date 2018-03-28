@@ -77,7 +77,6 @@ public class hiloCliente extends Thread {
     public void run() {
         try {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
             String mensaje;
             while ((mensaje = in.readLine()) != null) {
                 //System.out.println("Mensaje del cliente: " + mensaje);
@@ -239,6 +238,10 @@ public class hiloCliente extends Thread {
         if (fichero.delete()) {
             fichero = new File("./dataSets/" + identificadorUsuario + "/~" + nombre);
             fichero.delete();
+        }
+        if(dataSetCargado.equals(nombre)){
+            dataSetCargado="";
+            this.configuracion.setNombre(null);
         }
     }
 

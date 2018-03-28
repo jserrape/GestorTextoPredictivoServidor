@@ -20,6 +20,13 @@ import java.util.logging.Logger;
  */
 public class ConfiguracionDataSet implements Serializable, Cloneable {
 
+    /**
+     * @param nombre the nombre to set
+     */
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
     private String correo;
     private String nombre;
     private int tamMaxSemilla;
@@ -34,7 +41,7 @@ public class ConfiguracionDataSet implements Serializable, Cloneable {
      * @param nombre Nombre del dataSet
      */
     public void cambiarConfiguracionDataSet(String correo, String nombre) {
-        this.nombre = nombre;
+        this.setNombre(nombre);
         this.correo = correo;
         cargarConfiguracionDataSet(correo);
     }

@@ -25,7 +25,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 //-Xmx4g
-//args localhost predictorbbdd root gestor.predictivo@gmail.com jcsp0003 1
+//localhost predictorbbdd root gestor.predictivo@gmail.com jcsp0003 1
 public class Main {
 
     private static ServerSocket serverSocket;
