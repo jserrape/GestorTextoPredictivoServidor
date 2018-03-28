@@ -80,7 +80,7 @@ public class hiloCliente extends Thread {
 
             String mensaje;
             while ((mensaje = in.readLine()) != null) {
-                System.out.println("Mensaje del cliente: " + mensaje);
+                //System.out.println("Mensaje del cliente: " + mensaje);
                 if (mensaje.length() == 1) {
                     elegirAccion(mensaje.charAt(0), "");
                 } else {
